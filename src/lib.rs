@@ -1,12 +1,10 @@
+#![no_std]
 /**
 Copyright (c) 2020, Todd Stellanova
 All rights reserved.
 
 License: See LICENSE file
- */
-
-#![no_std]
-
+*/
 
 /// From Uptane standard: 5.4.4. Metadata verification procedures
 /// A Primary ECU MUST perform full verification of metadata.
@@ -40,19 +38,33 @@ pub enum Error {
     HashInvalid,
 }
 
-pub enum KeyType {
+pub enum KeyKind {
     RSA,
     Ed25519,
     Ecdsa,
 }
 
 pub struct KeyContainer<'a> {
-    pub keytype: KeyType,
-    pub keyid: Option<&'a str>,
+    pub key_type: KeyKind,
+    pub key_id: Option<&'a str>,
     /// eg  '-----BEGIN RSA PUBLIC KEY----- ...'
-    pub public_keyval: Option<&'a str>,
+    pub public_key: Option<&'a str>,
     /// eg '-----BEGIN RSA PRIVATE KEY----- ...'
-    pub private_keyval: Option<&'a str>,
+    pub private_key: Option<&'a str>,
+}
+
+pub enum SignatureMethod {
+    /// 'rsassa-pss'
+    RSA_SSA_PSS,
+    /// 'ed25519'
+    Ed25519,
+    /// 'nacl'
+    Nacl,
+}
+
+pub struct SignatureContainer<'a> {
+    pub key_id: Option<&'a str>,
+    pub method: SignatureMethod,
 }
 
 pub enum MetadataFormat {
@@ -62,13 +74,9 @@ pub enum MetadataFormat {
     DER,
 }
 
-pub struct UptaneCommonVerifier {}
+pub struct Verifier {}
 
-impl UptaneCommonVerifier {
-    //def verify_signature_over_metadata(
-    //     key_dict, signature, data, datatype,
-    //     metadata_format=tuf.conf.METADATA_FORMAT):
-
+impl Verifier {
 
     /// Checks whether the signer (whose keys are provided) signed the given object
     /// to produce the given signature.
@@ -80,12 +88,23 @@ impl UptaneCommonVerifier {
     /// - `format` the format of the metadata
     ///
     /// Returns Ok if verified, errors if not
-    fn verify_signature_over_metadata(
+    pub fn verify_signature_over_metadata(
         key: &KeyContainer,
-        sig: &[u8],
+        sig: &SignatureContainer,
         data: &[u8],
         metadata: &[u8],
         format: MetadataFormat,
+    ) -> Result<(), crate::Error> {
+
+        //TODO call verify_signature
+        Ok(())
+    }
+
+    /// Verify signature for data
+    fn verify_signature(public_key: &[u8],
+                        method: SignatureMethod,
+                        signature: &[u8],
+                        data: &[u8]
     ) -> Result<(), crate::Error> {
 
         Ok(())
@@ -95,10 +114,3 @@ impl UptaneCommonVerifier {
 
 
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
